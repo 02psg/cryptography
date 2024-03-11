@@ -1,13 +1,12 @@
 import java.util.Scanner;
-import java.util.*;
 
-public class AdditiveCipher {
+public class MultiplicativeCipher {
 
     public static String encrypt(String plaintext, int key) {
         StringBuilder ciphertext = new StringBuilder();
         for (char c : plaintext.toCharArray()) {
             if (Character.isLowerCase(c)) {
-                char encryptedChar = (char) (((c - 'a' + key) % 26) + 'A');
+                char encryptedChar = (char) (((c - 'a') * key % 26) + 'A');
                 ciphertext.append(encryptedChar);
             } else {
                 ciphertext.append(c);
@@ -18,9 +17,22 @@ public class AdditiveCipher {
 
     public static String decrypt(String ciphertext, int key) {
         StringBuilder plaintext = new StringBuilder();
+        int modInverse = -1;
+        for (int i = 0; i < 26; i++) {
+            if ((key * i) % 26 == 1) {
+                modInverse = i;
+                break;
+            }
+        }
+
+        if (modInverse == -1) {
+            System.out.println("The key does not have a multiplicative inverse.");
+            return "";
+        }
+
         for (char c : ciphertext.toCharArray()) {
             if (Character.isUpperCase(c)) {
-                char decryptedChar = (char) (((c - 'A' - key + 26) % 26) + 'a');
+                char decryptedChar = (char) ((((c - 'A') * modInverse) % 26) + 'a');
                 plaintext.append(decryptedChar);
             } else {
                 plaintext.append(c);
@@ -35,7 +47,7 @@ public class AdditiveCipher {
         String text;
 
         while (true) {
-            System.out.println("Additive Cipher");
+            System.out.println("Multiplicative Cipher");
             System.out.println("1. Encrypt");
             System.out.println("2. Decrypt");
             System.out.println("3. Brute Force Decryption");
@@ -46,39 +58,30 @@ public class AdditiveCipher {
             switch (choice) {
                 case 1:
                     System.out.print("Enter plaintext (lowercase only): ");
-                    scanner.nextLine(); // Consume the newline character
+                    scanner.nextLine();  // Consume the newline character
                     text = scanner.nextLine();
-                    if (text.matches("[a-z]+$")) {
-                        System.out.print("Enter key (positive integer): ");
-                        key = scanner.nextInt();
-                        String ciphertext = encrypt(text, key);
-                        System.out.println("Encrypted message (uppercase): " + ciphertext);
-                    } else {
-                        System.out.println("Please Enter in LowerCase");
-                    }
-
+                    System.out.print("Enter key (an integer coprime with 26): ");
+                    key = scanner.nextInt();
+                    String ciphertext = encrypt(text, key);
+                    System.out.println("Encrypted message (uppercase): " + ciphertext);
                     break;
 
                 case 2:
                     System.out.print("Enter ciphertext (uppercase only): ");
-                    scanner.nextLine(); // Consume the newline cha1racter
+                    scanner.nextLine();  // Consume the newline character
                     text = scanner.nextLine();
-                    if (text.matches("[A-Z]+$")) {
-                        System.out.print("Enter key (positive integer): ");
-                        key = scanner.nextInt();
-                        String decryptedText = decrypt(text, key);
-                        System.out.println("Decrypted message (lowercase): " + decryptedText);
-                    } else {
-                        System.out.println("Please Enter in UpperCase");
-                    }
+                    System.out.print("Enter key (an integer coprime with 26): ");
+                    key = scanner.nextInt();
+                    String decryptedText = decrypt(text, key);
+                    System.out.println("Decrypted message (lowercase): " + decryptedText);
                     break;
 
                 case 3:
                     System.out.print("Enter ciphertext (uppercase only): ");
-                    scanner.nextLine(); // Consume the newline character
+                    scanner.nextLine();  // Consume the newline character
                     text = scanner.nextLine();
                     System.out.println("Brute Force Decryption:");
-                    for (int i = 1; i <= 25; i++) {
+                    for (int i = 1; i < 26; i++) {
                         String possibleDecryption = decrypt(text, i);
                         System.out.println("Key " + i + ": " + possibleDecryption);
                     }
@@ -88,7 +91,7 @@ public class AdditiveCipher {
                     System.out.println("Exiting the program.");
                     scanner.close();
                     System.exit(0);
-
+                break;
                 default:
                     System.out.println("Invalid choice. Please enter 1, 2, 3, or 4.");
             }
