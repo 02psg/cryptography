@@ -2,33 +2,34 @@ import java.util.Scanner;
 
 public class PlayfairCipher {
 
-    
-    public static final int SIZE=5;
+    private static final int SIZE = 5;
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter the key: ");
         String key = scanner.nextLine().toUpperCase();
 
-        char matrix[][] = generateKeyMatrix(key);
-        printMatrix(matrix);
+        char[][] keyMatrix = generateKeyMatrix(key);
+        printKeyMatrix(keyMatrix);
 
-        String plaintext = scanner.nextLine();
-        System.out.println(plaintext);
+        System.out.print("Enter the plaintext: ");
+        String plaintext = scanner.nextLine().toUpperCase().replaceAll("[^A-Z]", "");
 
-       String ciphertext= encrypt(plaintext, matrix);
-       System.out.println(ciphertext);
-        
+        String ciphertext = encrypt(plaintext, keyMatrix);
+        System.out.println("Encrypted Text: " + ciphertext);
 
-       
+        String decryptedText = decrypt(ciphertext, keyMatrix);
+        System.out.println("Decrypted Text: " + decryptedText);
 
         scanner.close();
     }
+
     private static char[][] generateKeyMatrix(String key) {
         char[][] keyMatrix = new char[SIZE][SIZE];
         boolean[] taken = new boolean[26];
 
-        
+        int keyIndex = 0;
         int row = 0, col = 0;
 
         for (char ch : key.toCharArray()) {
@@ -66,16 +67,17 @@ public class PlayfairCipher {
 
         return keyMatrix;
     }
-    
-    public static void printMatrix(char matrix[][]){
-        for(int i=0;i<SIZE;i++){
-            for(int j=0;j<SIZE;j++){
 
-                System.out.print(matrix[i][j]+" ");
+    private static void printKeyMatrix(char[][] keyMatrix) {
+        System.out.println("Key Matrix:");
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                System.out.print(keyMatrix[i][j] + " ");
             }
-            System.out.println("");
+            System.out.println();
         }
     }
+
     private static String encrypt(String plaintext, char[][] keyMatrix) {
         StringBuilder ciphertext = new StringBuilder();
 
@@ -86,10 +88,10 @@ public class PlayfairCipher {
             int[] posFirst = findPosition(first, keyMatrix);
             int[] posSecond = findPosition(second, keyMatrix);
 
-            if (posFirst[0] == posSecond[0]) { 
+            if (posFirst[0] == posSecond[0]) { // Same row
                 ciphertext.append(keyMatrix[posFirst[0]][(posFirst[1] + 1) % SIZE]);
                 ciphertext.append(keyMatrix[posSecond[0]][(posSecond[1] + 1) % SIZE]);
-            } else if (posFirst[1] == posSecond[1]) {
+            } else if (posFirst[1] == posSecond[1]) { // Same column
                 ciphertext.append(keyMatrix[(posFirst[0] + 1) % SIZE][posFirst[1]]);
                 ciphertext.append(keyMatrix[(posSecond[0] + 1) % SIZE][posSecond[1]]);
             } else {
@@ -100,6 +102,32 @@ public class PlayfairCipher {
 
         return ciphertext.toString();
     }
+
+    private static String decrypt(String ciphertext, char[][] keyMatrix) {
+        StringBuilder plaintext = new StringBuilder();
+
+        for (int i = 0; i < ciphertext.length(); i += 2) {
+            char first = ciphertext.charAt(i);
+            char second = (i + 1 < ciphertext.length()) ? ciphertext.charAt(i + 1) : 'X';
+
+            int[] posFirst = findPosition(first, keyMatrix);
+            int[] posSecond = findPosition(second, keyMatrix);
+
+            if (posFirst[0] == posSecond[0]) { // Same row
+                plaintext.append(keyMatrix[posFirst[0]][(posFirst[1] - 1 + SIZE) % SIZE]);
+                plaintext.append(keyMatrix[posSecond[0]][(posSecond[1] - 1 + SIZE) % SIZE]);
+            } else if (posFirst[1] == posSecond[1]) { // Same column
+                plaintext.append(keyMatrix[(posFirst[0] - 1 + SIZE) % SIZE][posFirst[1]]);
+                plaintext.append(keyMatrix[(posSecond[0] - 1 + SIZE) % SIZE][posSecond[1]]);
+            } else {
+                plaintext.append(keyMatrix[posFirst[0]][posSecond[1]]);
+                plaintext.append(keyMatrix[posSecond[0]][posFirst[1]]);
+            }
+        }
+
+        return plaintext.toString();
+    }
+
     private static int[] findPosition(char ch, char[][] keyMatrix) {
         int[] position = new int[2];
 
@@ -115,6 +143,4 @@ public class PlayfairCipher {
 
         return position;
     }
-
 }
-
