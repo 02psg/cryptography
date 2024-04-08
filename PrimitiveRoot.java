@@ -1,11 +1,9 @@
-// Java program to find primitive root of a
-// given number n
+
 import java.util.*;
 
 class GFG
 {
 
-	// Returns true if n is prime
 	static boolean isPrime(int n) 
 	{
 		// Corner cases
